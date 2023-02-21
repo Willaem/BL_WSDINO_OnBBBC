@@ -152,12 +152,9 @@ class NaturalImageDataset(Dataset):
     def __init__(self, path10, local_crops_number):
         
         path0 = pd.read_csv(path10)
-        
-<<<<<<< Updated upstream
+
         self.X0 = path0[args.channel_headers[args.channel_to_train]]
-=======
-        self.X0 = path0[args.channel_headers[1]]          
->>>>>>> Stashed changes
+        self.X0 = path0[args.channel_headers[1]]
         self.tag = path0[args.weak_label_header] # label
         self.aug0 = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
