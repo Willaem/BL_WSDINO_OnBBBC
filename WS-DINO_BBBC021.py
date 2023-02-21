@@ -127,6 +127,7 @@ def get_args_parser():
     parser.add_argument("--local_rank", default=0, type=int, help="Please ignore and do not set this argument.")
     parser.add_argument('--channel_headers', default=['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
     parser.add_argument('--weak_label_header', default='Unique_Compounds', type=str) # change weak label here (see .csv headers)
+    parser.add_argument('--channel_to_train', default=0, type=int) # change channel to train here
     return parser
 
 df = pd.read_csv('.../BBBC021_annotated.csv')
@@ -152,7 +153,7 @@ class NaturalImageDataset(Dataset):
         
         path0 = pd.read_csv(path10)
         
-        self.X0 = path0[args.channel_headers[0]]         
+        self.X0 = path0[args.channel_headers[args.channel_to_train]]
         self.tag = path0[args.weak_label_header] # label
         self.aug0 = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
