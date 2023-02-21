@@ -43,7 +43,7 @@ def get_args_parser():
     # Model parameters
     parser.add_argument('--arch', default='vit_small', type=str,
         choices=['vit_tiny', 'vit_small', 'vit_base', 'xcit', 'deit_tiny', 'deit_small'] \
-                + torchvision_archs + torch.hub.list("facebookresearch/xcit:main"),
+                + torchvision_archs,
         help="""Name of architecture to train. For quick experiments with ViTs,
         we recommend using vit_tiny or vit_small.""")
     parser.add_argument('--patch_size', default=8, type=int, help="""Size in pixels
@@ -86,7 +86,7 @@ def get_args_parser():
     parser.add_argument('--clip_grad', type=float, default=0, help="""Maximal parameter
         gradient norm if using gradient clipping. Clipping with norm .3 ~ 1.0 can
         help optimization for larger ViT architectures. 0 for disabling.""")
-    parser.add_argument('--batch_size_per_gpu', default=16, type=int,
+    parser.add_argument('--batch_size_per_gpu', default=8, type=int,
         help='Per-GPU batch-size : number of distinct images loaded on one GPU.')
     parser.add_argument('--epochs', default=400, type=int, help='Number of epochs of training.')
     parser.add_argument('--freeze_last_layer', default=1, type=int, help="""Number of epochs
@@ -116,10 +116,10 @@ def get_args_parser():
         Used for small local view cropping of multi-crop.""")
 
     # Misc
-    parser.add_argument('--data_path', default=(f'/projects/img/GAN_CP/PAPER_2/BBBC021/BBBC021_annotated_no_DMSO _Guy.csv'), type=str,
+    parser.add_argument('--data_path', default=('BBBC021_annotated_corrected.csv'), type=str,
         help='Please specify path to the ImageNet training data.')
-    parser.add_argument('--output_dir', default=".", type=str, help='Path to save logs and checkpoints.')
-    parser.add_argument('--saveckp_freq', default=5, type=int, help='Save checkpoint every x epochs.')
+    parser.add_argument('--output_dir', default="./output/", type=str, help='Path to save logs and checkpoints.')
+    parser.add_argument('--saveckp_freq', default=50, type=int, help='Save checkpoint every x epochs.')
     parser.add_argument('--seed', default=0, type=int, help='Random seed.')
     parser.add_argument('--num_workers', default=1, type=int, help='Number of data loading workers per GPU.')
     parser.add_argument("--dist_url", default="env://", type=str, help="""url used to set up
@@ -130,7 +130,7 @@ def get_args_parser():
     parser.add_argument('--channel_to_train', default=0, type=int) # change channel to train here
     return parser
 
-df = pd.read_csv('.../BBBC021_annotated.csv')
+df = pd.read_csv('BBBC021_annotated_corrected.csv')
 
 idx_list = []
 weight_list = []
@@ -153,7 +153,11 @@ class NaturalImageDataset(Dataset):
         
         path0 = pd.read_csv(path10)
         
+<<<<<<< Updated upstream
         self.X0 = path0[args.channel_headers[args.channel_to_train]]
+=======
+        self.X0 = path0[args.channel_headers[1]]          
+>>>>>>> Stashed changes
         self.tag = path0[args.weak_label_header] # label
         self.aug0 = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
