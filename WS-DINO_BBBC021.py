@@ -386,9 +386,9 @@ def train_dino(args):
         }
         if fp16_scaler is not None:
             save_dict['fp16_scaler'] = fp16_scaler.state_dict()
-        utils.save_on_master(save_dict, os.path.join(args.output_dir, 'DAPI_weak_compound_DINO_checkpoint.pth'))
+        utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_checkpoint.pth'))
         if args.saveckp_freq and epoch % args.saveckp_freq == 0:
-            utils.save_on_master(save_dict, os.path.join(args.output_dir, f'DAPI_weak_compound_DINO_checkpoint{epoch:04}.pth'))
+            utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_checkpoint{epoch:04}.pth'))
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch}
         if utils.is_main_process():
