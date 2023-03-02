@@ -508,16 +508,16 @@ if __name__ == '__main__':
         print(channel)
         for train_epoch in range(0,100,5):
             if channel == 0:
-                weights = f'DAPI_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                weights = f'backup/Image_FileName_DAPI_weak_compound_DINO_checkpoint00{train_epoch}.pth'
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
 #                weights = f'pretrain_full_checkpoint.pth'
             else:
                 if channel == 1:
-                    weights = f'Tubulin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                    weights = f'backup/Image_FileName_Tubulin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'Tubulin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
                 else:
-                    weights = f'Actin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                    weights = f'backup/Image_FileName_Actin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'Actin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
 
