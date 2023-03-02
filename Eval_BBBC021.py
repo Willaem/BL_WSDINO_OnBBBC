@@ -19,8 +19,8 @@ from sklearn.preprocessing import MultiLabelBinarizer
 mlb = MultiLabelBinarizer()
 from sklearn.decomposition import PCA as sk_PCA
 
-x0train = pd.read_csv(f'.../BBBC021_annotated.csv')
-x0DMSO = pd.read_csv(f'.../BBBC021_DMSO.csv')
+x0train = pd.read_csv(f'BBBC021_annotated_corrected.csv')
+x0DMSO = pd.read_csv(f'BBBC021_DMSO_corrected.csv')
 
 num_classes = 12
 
@@ -494,7 +494,7 @@ if __name__ == '__main__':
     parser.add_argument("--dist_url", default="env://", type=str, help="""url used to set up
         distributed training; see https://pytorch.org/docs/stable/distributed.html""")
     parser.add_argument("--local_rank", default=0, type=int, help="Please ignore and do not set this argument.")
-    parser.add_argument('--data_path_train', default=(f'/BBBC021_annotated.csv'), type=str)
+    parser.add_argument('--data_path_train', default=(f'/BBBC021_annotated_corrected.csv'), type=str)
     parser.add_argument('--channel_headers', default= ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
 
     args = parser.parse_args()
@@ -506,18 +506,18 @@ if __name__ == '__main__':
     tally_epoch = []
     for channel in range(0,2):
         print(channel)
-        for train_epoch in range(0,100,5):
+        for train_epoch in ['0100', '0200', '0300', '']:
             if channel == 0:
-                weights = f'backup/Image_FileName_DAPI_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                weights = f'backup/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth'
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
 #                weights = f'pretrain_full_checkpoint.pth'
             else:
                 if channel == 1:
-                    weights = f'backup/Image_FileName_Tubulin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                    weights = f'backup/Image_FileName_Tubulin_weak_compound_DINO_checkpoint{train_epoch}.pth'
 #                    weights = f'Tubulin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
                 else:
-                    weights = f'backup/Image_FileName_Actin_weak_compound_DINO_checkpoint00{train_epoch}.pth'
+                    weights = f'backup/Image_FileName_Actin_weak_compound_DINO_checkpoint{train_epoch}.pth'
 #                    weights = f'Actin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
 
