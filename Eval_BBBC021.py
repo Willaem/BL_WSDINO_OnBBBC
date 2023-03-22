@@ -80,8 +80,12 @@ def extract_feature_pipeline(args, weights,channel):
         train_features_cpu = train_features.cpu()
         features_np = train_features_cpu.numpy() #convert to Numpy array
         df_csv = pd.DataFrame(features_np) #convert to a dataframe
-        df_csv.to_csv("021_trainfeatures.csv",index=True) #save to file
-        
+        df_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/trainfeatures.csv"),index=True) #save to file
+        dmso_features_cpu = train_features2.cpu()
+        dmso_features_np = dmso_features_cpu.numpy()
+        dmso_csv = pd.DataFrame(dmso_features_np)
+        dmso_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/controlfeatures.csv"), index=True)
+
     return train_features, train_features2#, test_features, train_labels, test_labels
 
 @torch.no_grad()
@@ -229,7 +233,7 @@ def Aggregate_features_NSC(features, channel, epoch):
     df = df.drop("replicate", axis=1)
     df = df.drop("plate", axis=1)
     df - df.drop("batch",axis=1)
-    df.to_csv(f"aggregated_features_{channel}_epoch_{epoch}.csv",index=True)
+    df.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/aggregated_features_{channel}_epoch_{epoch}.csv"),index=True)
     return df
 
 
@@ -247,7 +251,7 @@ def Aggregate_features_NSCB(features, channel, epoch):
     df = df.groupby('treatment').median()
     df = df.drop("replicate", axis=1)
     df = df.drop("plate", axis=1)
-    df.to_csv(f"NSCB_aggregated_features_weak_compound_{channel}_DINO_epoch_{epoch}.csv",index=True)
+    df.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/NSCB_aggregated_features_weak_compound_{channel}_DINO_epoch_{epoch}.csv"),index=True)
     return df
 
 
@@ -486,7 +490,7 @@ if __name__ == '__main__':
     parser.add_argument('--patch_size', default=8, type=int, help='Patch resolution of the model.')
     parser.add_argument("--checkpoint_key", default="teacher", type=str,
         help='Key to use in the checkpoint (example: "teacher")')
-    parser.add_argument('--dump_features', default='features8',
+    parser.add_argument('--dump_features', default='features',
         help='Path where to save computed features, empty for no saving')
     parser.add_argument('--load_features', default=None, help="""If the features have
         already been computed, where to find them.""")
@@ -496,6 +500,8 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", default=0, type=int, help="Please ignore and do not set this argument.")
     parser.add_argument('--data_path_train', default=(f'/BBBC021_annotated_corrected.csv'), type=str)
     parser.add_argument('--channel_headers', default= ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
+    parser.add_argument("--model_path", default="./training/", type=str)
+    parser.add_argument("--output_dir", default="features", type=str)
 
     args = parser.parse_args()
     utils.init_distributed_mode(args)
@@ -504,20 +510,20 @@ if __name__ == '__main__':
     cudnn.benchmark = True
     
     tally_epoch = []
-    for channel in range(0,2):
+    for channel in range(0,3):
         print(channel)
         for train_epoch in ['0100', '0200', '0300', '']:
             if channel == 0:
-                weights = f'backup/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth'
+                weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth')
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
 #                weights = f'pretrain_full_checkpoint.pth'
             else:
                 if channel == 1:
-                    weights = f'backup/Image_FileName_Tubulin_weak_compound_DINO_checkpoint{train_epoch}.pth'
+                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Tubulin_weak_compound_DINO_checkpoint{train_epoch}.pth')
 #                    weights = f'Tubulin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
                 else:
-                    weights = f'backup/Image_FileName_Actin_weak_compound_DINO_checkpoint{train_epoch}.pth'
+                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Actin_weak_compound_DINO_checkpoint{train_epoch}.pth')
 #                    weights = f'Actin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
 

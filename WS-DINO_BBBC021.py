@@ -134,7 +134,7 @@ df = pd.read_csv('BBBC021_annotated_corrected.csv')
 
 idx_list = []
 weight_list = []
-for i in range(0,38): # 12 for MOA, 38 for compound, 103 for treatment
+for i in range(0,12): # 12 for MOA, 38 for compound, 103 for treatment
      idx_list.append(df.index[df.Unique_Compounds == i].tolist())
      length = len(idx_list[i])
      weight_sub_list = [length] * length
@@ -392,7 +392,7 @@ def train_dino(args):
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch}
         if utils.is_main_process():
-            with (Path(args.output_dir) / "DAPI_weak_compound_DINO_log.txt").open("a") as f:
+            with (Path(args.output_dir) / f"{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_log.txt").open("a") as f:
                 f.write(json.dumps(log_stats) + "\n")
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

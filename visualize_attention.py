@@ -87,7 +87,7 @@ if __name__ == '__main__':
         help="Path to pretrained weights to load.")
     parser.add_argument("--checkpoint_key", default="teacher", type=str,
         help='Key to use in the checkpoint (example: "teacher")')
-    parser.add_argument("--image_path", default=None, type=str, help="Path of the image to load.")
+    parser.add_argument("--image_path", default='/home/wilec5/scratch/bbbc/corrected/ws-dino/phase_2/', type=str, help="Path of the image to load.")
     parser.add_argument("--image_size", default=(640, 512), type=int, nargs="+", help="Resize image.")
     parser.add_argument('--output_dir', default='.', help='Path where to save visualizations.')
     parser.add_argument("--threshold", type=float, default=50, help="""We visualize masks
