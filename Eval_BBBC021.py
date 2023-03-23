@@ -19,12 +19,10 @@ from sklearn.preprocessing import MultiLabelBinarizer
 mlb = MultiLabelBinarizer()
 from sklearn.decomposition import PCA as sk_PCA
 
-x0train = pd.read_csv(f'BBBC021_annotated_corrected.csv')
-x0DMSO = pd.read_csv(f'BBBC021_DMSO_corrected.csv')
-
-num_classes = 12
-
 def extract_feature_pipeline(args, weights,channel):
+    x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+    x0DMSO = pd.read_csv(f'references/BBBC021_DMSO_corrected.csv')
+
     dataset_train = ReturnIndexDataset(x0train, channel)
     dataset_train2 = ReturnIndexDataset_DMSO(x0DMSO, channel)
     sampler = SequentialSampler(dataset_train)
@@ -498,16 +496,23 @@ if __name__ == '__main__':
     parser.add_argument("--dist_url", default="env://", type=str, help="""url used to set up
         distributed training; see https://pytorch.org/docs/stable/distributed.html""")
     parser.add_argument("--local_rank", default=0, type=int, help="Please ignore and do not set this argument.")
-    parser.add_argument('--data_path_train', default=(f'/BBBC021_annotated_corrected.csv'), type=str)
     parser.add_argument('--channel_headers', default= ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
     parser.add_argument("--model_path", default="./training/", type=str)
     parser.add_argument("--output_dir", default="features", type=str)
+    parser.add_argument("--drop_label", default=False, type=bool)
+    parser.add_argument('--label_to_drop', default=0, type=int, help='The label to drop.')
 
     args = parser.parse_args()
     utils.init_distributed_mode(args)
     print("git:\n  {}\n".format(utils.get_sha()))
     print("\n".join("%s: %s" % (k, str(v)) for k, v in sorted(dict(vars(args)).items())))
     cudnn.benchmark = True
+
+    if args.drop_label:
+        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
+    else :
+        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+    x0DMSO = pd.read_csv('references/BBBC021_DMSO_corrected.csv')
     
     tally_epoch = []
     for channel in range(0,3):
