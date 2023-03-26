@@ -497,7 +497,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", default=0, type=int, help="Please ignore and do not set this argument.")
     parser.add_argument('--channel_headers', default= ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
     parser.add_argument("--model_path", default="./training/", type=str)
-    parser.add_argument("--output_dir", default="features", type=str)
+    parser.add_argument("--output_dir", default="20230324", type=str)
     parser.add_argument("--drop_label", default=False, type=bool)
     parser.add_argument('--label_to_drop', default=0, type=int, help='The label to drop.')
 
@@ -515,7 +515,7 @@ if __name__ == '__main__':
     tally_epoch = []
     for channel in range(0,3):
         print(channel)
-        for train_epoch in ['0100', '0200', '0300', '']:
+        for train_epoch in ['0000', '0200', '']:
             if channel == 0:
                 weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth')
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
