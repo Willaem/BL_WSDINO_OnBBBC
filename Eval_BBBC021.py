@@ -19,8 +19,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 mlb = MultiLabelBinarizer()
 from sklearn.decomposition import PCA as sk_PCA
 
-def extract_feature_pipeline(args, weights,channel):
-    x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+def extract_feature_pipeline(args, weights,channel,x0train):
     x0DMSO = pd.read_csv(f'references/BBBC021_DMSO_corrected.csv')
 
     dataset_train = ReturnIndexDataset(x0train, channel)
@@ -512,7 +511,6 @@ if __name__ == '__main__':
         x0train = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
     else :
         x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
-    x0DMSO = pd.read_csv('references/BBBC021_DMSO_corrected.csv')
     
     tally_epoch = []
     for channel in range(0,3):
@@ -532,7 +530,7 @@ if __name__ == '__main__':
 #                    weights = f'Actin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
 
-            train_features, DMSO_features = extract_feature_pipeline(args,weights,channel)
+            train_features, DMSO_features = extract_feature_pipeline(args,weights,channel,x0train)
             if utils.get_rank() == 0:
                 if args.use_cuda:
                     train_features = train_features.cuda()
