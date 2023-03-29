@@ -77,11 +77,11 @@ def extract_feature_pipeline(args, weights,channel,x0train):
         train_features_cpu = train_features.cpu()
         features_np = train_features_cpu.numpy() #convert to Numpy array
         df_csv = pd.DataFrame(features_np) #convert to a dataframe
-        df_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/trainfeatures.csv"),index=True) #save to file
+        df_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/channel{channel}_trainfeatures.csv"),index=True) #save to file
         dmso_features_cpu = train_features2.cpu()
         dmso_features_np = dmso_features_cpu.numpy()
         dmso_csv = pd.DataFrame(dmso_features_np)
-        dmso_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/controlfeatures.csv"), index=True)
+        dmso_csv.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/channel{channel}_controlfeatures.csv"), index=True)
 
     return train_features, train_features2#, test_features, train_labels, test_labels
 
@@ -290,7 +290,7 @@ def NSC_function(features, channel, epoch):
         else:
             tally.append(0)
         a_ret = np.mean(tally)
-        print(a_ret)
+        print(f'NSC = {a_ret} | Epoch : {epoch} | Channel : {channel}')
     return a_ret
         
 def NSCB_function(features, channel, epoch):
@@ -332,7 +332,7 @@ def NSCB_function(features, channel, epoch):
         else:
             tally.append(0)
         a_ret = np.mean(tally)
-        print(a_ret)
+        print(f'NSCB = {a_ret} | Epoch : {epoch} | Channel : {channel}')
     return a_ret
 
 class ReturnIndexDataset(Dataset):
@@ -513,8 +513,9 @@ if __name__ == '__main__':
         x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
     
     tally_epoch = []
+    tally_nscb = []
+    tally_channel = []
     for channel in range(0,3):
-        print(channel)
         for train_epoch in ['0000', '0200', '']:
             if channel == 0:
                 weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth')
@@ -538,7 +539,11 @@ if __name__ == '__main__':
             
             train_features = correct_tvn(DMSO_features, train_features)
             nscb_epoch = NSCB_function(train_features, channel, train_epoch)
-            tally_epoch.append(nscb_epoch)
-            print(tally_epoch)
+            tally_epoch.append(train_epoch)
+            tally_nscb.append(nscb_epoch)
+	    tally_channel.append(channel)
+    df = pd.concat([tally_nscb, tally_epoch, tally_channel])
+    savepath = os.path.join(args.output_dir, 'NSCB_scores.csv')
+    df.to_csv(savepath)
     dist.barrier()
     
