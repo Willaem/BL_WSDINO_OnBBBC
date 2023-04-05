@@ -116,8 +116,6 @@ def get_args_parser():
         Used for small local view cropping of multi-crop.""")
 
     # Misc
-    parser.add_argument('--data_path', default=('references/BBBC021_annotated_corrected.csv'), type=str,
-        help='Please specify path to the ImageNet training data.')
     parser.add_argument('--output_dir', default="./output/", type=str, help='Path to save logs and checkpoints.')
     parser.add_argument('--saveckp_freq', default=50, type=int, help='Save checkpoint every x epochs.')
     parser.add_argument('--seed', default=0, type=int, help='Random seed.')
@@ -130,19 +128,38 @@ def get_args_parser():
     # Selection
     parser.add_argument('--weak_label_header', default='Unique_Compounds', type=str) # change weak label here (see .csv headers)
     parser.add_argument('--channel_to_train', default=0, type=int) # change channel to train here
-    parser.add_argument('--label_to_drop', default=0, type=int)  # change channel to train here
+    parser.add_argument('--label_to_drop', default=None, type=int)  #
     return parser
 
-def makeWeights(label):
-    df = pd.read_csv(f'references/BBBC021_annotated_corrected_{label}.csv')
+def makeWeights(args):
+    if args.label_to_drop is None:
+        df = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+    else :
+        df = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
 
     idx_list = []
     weight_list = []
-    for i in range(0,12): # 12 for MOA, 38 for compound, 103 for treatment
-         idx_list.append(df.index[df.Unique_Compounds == i].tolist())
-         length = len(idx_list[i])
-         weight_sub_list = [length] * length
-         weight_list.append(weight_sub_list)
+
+    if args.weak_label_header == 'Unique_MoA':
+        for i in range(0,12): # 12 for MOA, 38 for compound, 103 for treatment
+             idx_list.append(df.index[df.Unique_MoA == i].tolist())
+             length = len(idx_list[i])
+             weight_sub_list = [length] * length
+             weight_list.append(weight_sub_list)
+
+    if args.weak_label_header == 'Unique_Compounds':
+        for i in range(0,38): # 12 for MOA, 38 for compound, 103 for treatment
+             idx_list.append(df.index[df.Unique_Compounds == i].tolist())
+             length = len(idx_list[i])
+             weight_sub_list = [length] * length
+             weight_list.append(weight_sub_list)
+
+    if args.weak_label_header == 'Unique_Treatments':
+        for i in range(0,103): # 12 for MOA, 38 for compound, 103 for treatment
+             idx_list.append(df.index[df.Unique_Treatments == i].tolist())
+             length = len(idx_list[i])
+             weight_sub_list = [length] * length
+             weight_list.append(weight_sub_list)
 
     weight_list_flat = []
     for nums in weight_list:
@@ -247,8 +264,13 @@ def train_dino(args):
     cudnn.benchmark = True
 
     # ============ preparing data ... ============
-    dataset = NaturalImageDataset(args.data_path, local_crops_number= args.local_crops_number)
-    weighty = makeWeights(args.label_to_drop)
+    if args.label_to_drop is None :
+        path_to_ref_sheet = 'references/BBBC021_annotated_corrected.csv'
+    else :
+        path_to_ref_sheet = f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv'
+
+    dataset = NaturalImageDataset(path_to_ref_sheet, local_crops_number= args.local_crops_number)
+    weighty = makeWeights(args)
     sampler = WeightedRandomSampler(weighty, num_samples=len(weighty))
     data_loader = torch.utils.data.DataLoader(
         dataset,
@@ -391,13 +413,13 @@ def train_dino(args):
         }
         if fp16_scaler is not None:
             save_dict['fp16_scaler'] = fp16_scaler.state_dict()
-        utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_checkpoint.pth'))
+        utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_{args.weak_label_header}_DINO_checkpoint.pth'))
         if args.saveckp_freq and epoch % args.saveckp_freq == 0:
-            utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_checkpoint{epoch:04}.pth'))
+            utils.save_on_master(save_dict, os.path.join(args.output_dir, f'{args.channel_headers[args.channel_to_train]}_{args.weak_label_header}_DINO_checkpoint{epoch:04}.pth'))
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch}
         if utils.is_main_process():
-            with (Path(args.output_dir) / f"{args.channel_headers[args.channel_to_train]}_weak_compound_DINO_log.txt").open("a") as f:
+            with (Path(args.output_dir) / f"{args.channel_headers[args.channel_to_train]}_{args.weak_label_header}_DINO_log.txt").open("a") as f:
                 f.write(json.dumps(log_stats) + "\n")
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

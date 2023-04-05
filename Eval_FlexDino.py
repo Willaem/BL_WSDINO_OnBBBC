@@ -248,7 +248,7 @@ def Aggregate_features_NSCB(features, channel, epoch):
     df = df.groupby('treatment').median()
     df = df.drop("replicate", axis=1)
     df = df.drop("plate", axis=1)
-    df.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/NSCB_aggregated_features_weak_compound_{channel}_DINO_epoch_{epoch}.csv"),index=True)
+    df.to_csv(os.path.join(args.output_dir, f"{args.dump_features}/NSCB_aggregated_features_{args.weak_label_header}_{channel}_DINO_epoch_{epoch}.csv"),index=True)
     return df
 
 
@@ -498,8 +498,8 @@ if __name__ == '__main__':
     parser.add_argument('--channel_headers', default= ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin'], type=list)
     parser.add_argument("--model_path", default="./training/", type=str)
     parser.add_argument("--output_dir", default="20230324", type=str)
-    parser.add_argument("--drop_label", default=False, type=bool)
-    parser.add_argument('--label_to_drop', default=0, type=int, help='The label to drop.')
+    parser.add_argument('--label_to_drop', default=None, type=int, help='The label to drop.')
+    parser.add_argument("--weak_label_header", default="Unique_Compounds", type=str)
 
     args = parser.parse_args()
     utils.init_distributed_mode(args)
@@ -507,27 +507,27 @@ if __name__ == '__main__':
     print("\n".join("%s: %s" % (k, str(v)) for k, v in sorted(dict(vars(args)).items())))
     cudnn.benchmark = True
 
-    if args.drop_label:
-        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
-    else :
+    if args.label_to_drop is None :
         x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
-    
+    else :
+        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
+
     tally_epoch = []
     tally_nscb = []
     tally_channel = []
     for channel in range(0,3):
         for train_epoch in ['0000', '0200', '']:
             if channel == 0:
-                weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_weak_compound_DINO_checkpoint{train_epoch}.pth')
+                weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_{args.weak_label_header}_DINO_checkpoint{train_epoch}.pth')
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
 #                weights = f'pretrain_full_checkpoint.pth'
             else:
                 if channel == 1:
-                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Tubulin_weak_compound_DINO_checkpoint{train_epoch}.pth')
+                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Tubulin_{args.weak_label_header}_DINO_checkpoint{train_epoch}.pth')
 #                    weights = f'Tubulin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
                 else:
-                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Actin_weak_compound_DINO_checkpoint{train_epoch}.pth')
+                    weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_Actin_{args.weak_label_header}_DINO_checkpoint{train_epoch}.pth')
 #                    weights = f'Actin_DINO_checkpoint00{train_epoch}.pth'
 #                    weights = f'pretrain_full_checkpoint.pth'
 
