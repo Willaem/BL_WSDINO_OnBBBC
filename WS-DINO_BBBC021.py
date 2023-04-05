@@ -116,7 +116,7 @@ def get_args_parser():
         Used for small local view cropping of multi-crop.""")
 
     # Misc
-    parser.add_argument('--data_path', default=('BBBC021_annotated_corrected.csv'), type=str,
+    parser.add_argument('--data_path', default=('references/BBBC021_annotated_corrected.csv'), type=str,
         help='Please specify path to the ImageNet training data.')
     parser.add_argument('--output_dir', default="./output/", type=str, help='Path to save logs and checkpoints.')
     parser.add_argument('--saveckp_freq', default=50, type=int, help='Save checkpoint every x epochs.')
@@ -130,12 +130,12 @@ def get_args_parser():
     parser.add_argument('--channel_to_train', default=0, type=int) # change channel to train here
     return parser
 
-df = pd.read_csv('BBBC021_annotated_corrected.csv')
+df = pd.read_csv('references/BBBC021_annotated_corrected.csv')
 
 idx_list = []
 weight_list = []
 for i in range(0,12): # 12 for MOA, 38 for compound, 103 for treatment
-     idx_list.append(df.index[df.Unique_Compounds == i].tolist())
+     idx_list.append(df.index[df.Unique_MoA == i].tolist())
      length = len(idx_list[i])
      weight_sub_list = [length] * length
      weight_list.append(weight_sub_list)
@@ -404,9 +404,11 @@ def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loade
                     fp16_scaler, args):
     metric_logger = utils.MetricLogger(delimiter="  ")
     header = 'Epoch: [{}/{}]'.format(epoch, args.epochs)
+    print(f'Dataloader Length : {len(data_loader)}')
     for it, images in enumerate(metric_logger.log_every(data_loader, 10, header)):
         # update weight decay and learning rate according to their schedule
         it = len(data_loader) * epoch + it  # global training iteration
+        print(f'Images interacted with : {len(images)}')
         for i, param_group in enumerate(optimizer.param_groups):
             param_group["lr"] = lr_schedule[it]
             if i == 0:  # only the first group is regularized

@@ -73,7 +73,7 @@ def extract_feature_pipeline(args, weights,channel,x0train):
     print(train_features2.size())
 
     if args.dump_features and dist.get_rank() == 0:
-        torch.save(train_features.cpu(), os.path.join(args.dump_features, f"021_trainfeat.pth"))
+        torch.save(train_features.cpu(), os.path.join(args.output_dir, f"{args.dump_features}/trainfeat.pth"))
         train_features_cpu = train_features.cpu()
         features_np = train_features_cpu.numpy() #convert to Numpy array
         df_csv = pd.DataFrame(features_np) #convert to a dataframe
@@ -541,8 +541,8 @@ if __name__ == '__main__':
             nscb_epoch = NSCB_function(train_features, channel, train_epoch)
             tally_epoch.append(train_epoch)
             tally_nscb.append(nscb_epoch)
-	    tally_channel.append(channel)
-    df = pd.concat([tally_nscb, tally_epoch, tally_channel])
+            tally_channel.append(channel)
+    df = pd.concat([pd.Series(tally_nscb), pd.Series(tally_epoch), pd.Series(tally_channel)])
     savepath = os.path.join(args.output_dir, 'NSCB_scores.csv')
     df.to_csv(savepath)
     dist.barrier()

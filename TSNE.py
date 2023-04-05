@@ -13,15 +13,15 @@ sys.path.append('...')
 
 epoch = '0200'
 weak_label = 'compound' # MOA, treatment, none 
-folder = '20230313'
+folder = '20230329_full'
 
-df_0 = pd.read_csv(f'{folder}/NSCB_aggregated_features_weak_{weak_label}_0_DINO_epoch_{epoch}.csv')
+df_0 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_0_DINO_epoch_{epoch}.csv')
 label_df = df_0[["compound", "moa", "batch"]]
 label_np = label_df.to_numpy()
 feature_df0 = df_0.iloc[: , 1:-3]
-df_1 = pd.read_csv(f'{folder}/NSCB_aggregated_features_weak_{weak_label}_1_DINO_epoch_{epoch}.csv')
+df_1 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_1_DINO_epoch_{epoch}.csv')
 feature_df1 = df_1.iloc[: , 1:-3]
-df_2 = pd.read_csv(f'{folder}/NSCB_aggregated_features_weak_{weak_label}_2_DINO_epoch_{epoch}.csv')
+df_2 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_2_DINO_epoch_{epoch}.csv')
 feature_df2 = df_2.iloc[: , 1:-3]
 
 feature_df = np.concatenate([feature_df0, feature_df1, feature_df2],axis=1)
@@ -31,7 +31,7 @@ label_plot = label_df
 tosave = np.concatenate([feature_df, label_np], axis = 1)
 tosave = pd.DataFrame(tosave)
 tosave.columns = [*tosave.columns[:-3],'compound', 'moa','batch']
-tosave.to_csv(f"{folder}/MEANaggregated_features_weak_{weak_label}_3ch_epoch_{epoch}.csv",index=True) #save to file
+tosave.to_csv(f"{folder}/features/MEANaggregated_features_weak_{weak_label}_3ch_epoch_{epoch}.csv",index=True) #save to file
 
 
 
@@ -165,7 +165,7 @@ y_hue=y_hue.apply(str)
 print(y_hue)
 x = df
 print(x)
-tsne = TSNE(n_components=2, verbose=1)#, random_state=123)
+tsne = TSNE(n_components=2, verbose=1, random_state=123)
 z = tsne.fit_transform(x) 
 
 df2 = pd.DataFrame()
@@ -179,4 +179,4 @@ sns_plot = sns.scatterplot(x="comp-1", y="comp-2", hue="y_hue",
 
 sns_plot.legend(fontsize='xx-small')
 
-plt.savefig(f'{folder}/tsne_{epoch}_{weak_label}.png')
+plt.savefig(f'{folder}/features/tsne_{epoch}_{weak_label}.png')

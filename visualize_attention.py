@@ -131,7 +131,7 @@ if __name__ == '__main__':
             print("There is no reference weights available for this model => We use random weights.")
 
 
-    f = '.../BBBC021_annotated.csv'
+    f = 'references/BBBC021_annotated_corrected.csv'
     channel_headers = ['Image_FileName_DAPI','Image_FileName_Tubulin', 'Image_FileName_Actin']
     
     path0 = pd.read_csv(f)
