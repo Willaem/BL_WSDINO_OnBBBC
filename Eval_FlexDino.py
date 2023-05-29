@@ -509,14 +509,13 @@ if __name__ == '__main__':
 
     if args.label_to_drop is None :
         x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+        train_epochs = ['0000', '0025', '0050', '0075', '0100', '0125', '0150', '0175', '0200', '0225', '0250', '0275', '0300', '0325', '0350', '0375', '']
     else :
-        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected_{args.label_to_drop}.csv')
+        x0train = pd.read_csv(f'references/BBBC021_annotated_corrected.csv')
+        train_epochs = ['0000', '0100', '0200', '0300', '']
 
-    tally_epoch = []
-    tally_nscb = []
-    tally_channel = []
     for channel in range(0,3):
-        for train_epoch in ['0000', '0200', '']:
+        for train_epoch in train_epochs:
             if channel == 0:
                 weights = os.path.join(args.output_dir, f'{args.model_path}/Image_FileName_DAPI_{args.weak_label_header}_DINO_checkpoint{train_epoch}.pth')
 #                weights = f'DAPI_DINO_checkpoint00{train_epoch}.pth'
@@ -538,12 +537,6 @@ if __name__ == '__main__':
                     DMSO_features = DMSO_features.cuda()
             
             train_features = correct_tvn(DMSO_features, train_features)
-            nscb_epoch = NSCB_function(train_features, channel, train_epoch)
-            tally_epoch.append(train_epoch)
-            tally_nscb.append(nscb_epoch)
-            tally_channel.append(channel)
-    df = pd.concat([pd.Series(tally_nscb), pd.Series(tally_epoch), pd.Series(tally_channel)])
-    savepath = os.path.join(args.output_dir, 'NSCB_scores.csv')
-    df.to_csv(savepath)
+            nscb_epoch = Aggregate_features_NSCB(train_features, channel, train_epoch)
     dist.barrier()
     

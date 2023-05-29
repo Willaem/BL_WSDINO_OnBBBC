@@ -382,7 +382,7 @@ def train_dino(args):
     # ============ optionally resume training ... ============
     to_restore = {"epoch": 0}
     utils.restart_from_checkpoint(
-        os.path.join(args.output_dir, "pretrain_full_checkpoint.pth"),
+        os.path.join("", "references/pretrain_full_checkpoint.pth"),
         run_variables=to_restore,
         student=student,
         teacher=teacher,

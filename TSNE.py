@@ -11,17 +11,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 sys.path.append('...')
 
 
-epoch = '0200'
+epoch = ''
 weak_label = 'compound' # MOA, treatment, none 
-folder = '20230329_full'
+weak_label_header = "Unique_Compounds"
+folder = 'full_trainings/full_cmp_singlegpu'
 
-df_0 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_0_DINO_epoch_{epoch}.csv')
+df_0 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label_header}_0_DINO_epoch_{epoch}.csv')
 label_df = df_0[["compound", "moa", "batch"]]
 label_np = label_df.to_numpy()
 feature_df0 = df_0.iloc[: , 1:-3]
-df_1 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_1_DINO_epoch_{epoch}.csv')
+df_1 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label_header}_1_DINO_epoch_{epoch}.csv')
 feature_df1 = df_1.iloc[: , 1:-3]
-df_2 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label}_2_DINO_epoch_{epoch}.csv')
+df_2 = pd.read_csv(f'{folder}/features/NSCB_aggregated_features_weak_{weak_label_header}_2_DINO_epoch_{epoch}.csv')
 feature_df2 = df_2.iloc[: , 1:-3]
 
 feature_df = np.concatenate([feature_df0, feature_df1, feature_df2],axis=1)
