@@ -175,7 +175,6 @@ class NaturalImageDataset(Dataset):
         path0 = pd.read_csv(path10)
 
         self.X0 = path0[args.channel_headers[args.channel_to_train]]
-        self.X0 = path0[args.channel_headers[1]]
         self.tag = path0[args.weak_label_header] # label
         self.aug0 = albumentations.Compose([
         albumentations.HorizontalFlip(p=0.5),
