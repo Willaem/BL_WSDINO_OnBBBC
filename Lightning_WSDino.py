@@ -13,13 +13,13 @@ from lightly.models.utils import deactivate_requires_grad, update_momentum
 from lightly.transforms.dino_transform import DINOTransform
 from lightly.utils.scheduler import cosine_schedule
 
-from dataset import BBBC021_3ChannelSet
+from datasets import BBBC021_Cleanloader
 class DINO(pl.LightningModule):
     def __init__(self):
         super().__init__()
         resnet = torchvision.models.resnet18()
         backbone = nn.Sequential(*list(resnet.children())[:-1])
-        input_dim = 224
+        input_dim = 512
         # instead of a resnet you can also use a vision transformer backbone as in the
         # original paper (you might have to reduce the batch size in this case):
         # backbone = torch.hub.load('facebookresearch/dino:main', 'dino_vits16', pretrained=False)
@@ -65,28 +65,28 @@ class DINO(pl.LightningModule):
         optim = torch.optim.Adam(self.parameters(), lr=0.001)
         return optim
 
+if __name__ == '__main__':
+    model = DINO()
 
-model = DINO()
+    # we ignore object detection annotations by setting target_transform to return 0
+    bbbc021set = BBBC021_Cleanloader('references/BBBC021_annotated_corrected_win.csv')
+    transform = DINOTransform(random_gray_scale=0)
+    dataset = LightlyDataset.from_torch_dataset(bbbc021set, transform=transform)
+    # or create a dataset from a folder containing images or videos:
+    # dataset = LightlyDataset("path/to/folder")
 
-# we ignore object detection annotations by setting target_transform to return 0
-bbbc021set = BBBC021_3ChannelSet('references/BBBC021_annotated_corrected.csv', local_crops_number=8)
-transform = DINOTransform()
-dataset = LightlyDataset.from_torch_dataset(bbbc021set, transform=transform)
-# or create a dataset from a folder containing images or videos:
-# dataset = LightlyDataset("path/to/folder")
+    collate_fn = MultiViewCollate()
 
-collate_fn = MultiViewCollate()
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=4,
+        collate_fn=collate_fn,
+        shuffle=True,
+        drop_last=True,
+        num_workers=4,
+    )
 
-dataloader = torch.utils.data.DataLoader(
-    dataset,
-    batch_size=8,
-    collate_fn=collate_fn,
-    shuffle=True,
-    drop_last=True,
-    num_workers=4,
-)
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 
-accelerator = "gpu" if torch.cuda.is_available() else "cpu"
-
-trainer = pl.Trainer(max_epochs=1, devices=1, accelerator=accelerator)
-trainer.fit(model=model, train_dataloaders=dataloader)
+    trainer = pl.Trainer(max_epochs=1, devices=1, accelerator=accelerator)
+    trainer.fit(model=model, train_dataloaders=dataloader)
